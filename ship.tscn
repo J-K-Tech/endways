@@ -1,0 +1,323 @@
+[gd_scene load_steps=20 format=2]
+
+[ext_resource path="res://Player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/3d/world/ship.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/water.jpg" type="Texture" id=3]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial; 
+render_mode skip_vertex_transform, diffuse_lambert_wrap, specular_phong, vertex_lighting, depth_draw_alpha_prepass, cull_disabled;
+
+uniform vec4 tint_color : hint_color = vec4(1.0);
+uniform sampler2D albedoTex : hint_albedo;
+uniform sampler2D dither : hint_albedo;
+uniform float specular_intensity : hint_range(0, 1);
+uniform float vertex_resolution = 256;
+uniform float cull_distance = 9999;
+uniform vec2 uv_scale = vec2(1.0, 1.0);
+uniform vec2 uv_offset = vec2(.0, .0);
+uniform vec2 uv_speed = vec2(0,-1);
+
+uniform bool affine_texture_mapping = true;
+uniform bool emissive = false;
+uniform bool moving_uv = false;
+uniform bool double_sided = false;
+
+uniform bool stippled_transparent = false;
+
+varying vec4 vertex_coordinates;
+
+void vertex() {
+	UV = UV * uv_scale + uv_offset + ((moving_uv)?uv_speed*TIME:vec2(0.0));
+	
+	float vertex_distance = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)));
+	
+	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	NORMAL = abs(vec4(NORMAL, 1.) * MODELVIEW_MATRIX).xyz;
+	
+	float vPos_w = (PROJECTION_MATRIX * vec4(VERTEX, 1.0)).w;
+	VERTEX.xy = vPos_w * round(vertex_resolution * VERTEX.xy / vPos_w) / vertex_resolution;
+	vertex_coordinates = vec4(UV * VERTEX.z, VERTEX.z, 0.0);
+	
+	if (vertex_distance > cull_distance)
+		VERTEX = vec3(.0);
+}
+
+void fragment() {
+	if (stippled_transparent && (mod(SCREEN_UV.x*VIEWPORT_SIZE.x+floor(mod(SCREEN_UV.y*VIEWPORT_SIZE.y, 2.0)), 2.0)<1.0)){
+		discard;
+	}
+	
+	vec4 tex;
+	if (affine_texture_mapping){
+		tex = texture(albedoTex, vertex_coordinates.xy / vertex_coordinates.z);
+	} else {
+		tex = texture(albedoTex, UV);
+	}
+	
+	ALPHA_SCISSOR = 0.5;
+	
+	if (!double_sided && !FRONT_FACING){
+		ALPHA = 0.0;
+	} else {
+		ALPHA = tex.a * tint_color.a * COLOR.a;
+	}
+
+	if (emissive){
+		EMISSION = tex.rgb * tint_color.rgb * COLOR.rgb;
+		ALBEDO = vec3(0.0);
+	} else {
+		ALBEDO = tex.rgb * tint_color.rgb * COLOR.rgb;
+	}
+	SPECULAR = specular_intensity;
+	ROUGHNESS = 1.0;
+	
+}
+"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+shader_param/tint_color = Color( 1, 1, 1, 1 )
+shader_param/specular_intensity = 0.0
+shader_param/vertex_resolution = 50.0
+shader_param/cull_distance = 200.0
+shader_param/uv_scale = Vector2( 1, 1 )
+shader_param/uv_offset = Vector2( 0, 0 )
+shader_param/uv_speed = Vector2( 0, -1 )
+shader_param/affine_texture_mapping = true
+shader_param/emissive = false
+shader_param/moving_uv = false
+shader_param/double_sided = false
+shader_param/stippled_transparent = false
+
+[sub_resource type="Shader" id=3]
+code = "shader_type spatial; 
+render_mode skip_vertex_transform, diffuse_lambert_wrap, specular_phong, vertex_lighting, depth_draw_alpha_prepass, cull_disabled;
+
+uniform vec4 tint_color : hint_color = vec4(1.0);
+uniform sampler2D albedoTex : hint_albedo;
+uniform sampler2D dither : hint_albedo;
+uniform float specular_intensity : hint_range(0, 1);
+uniform float vertex_resolution = 256;
+uniform float cull_distance = 9999;
+uniform vec2 uv_scale = vec2(1.0, 1.0);
+uniform vec2 uv_offset = vec2(.0, .0);
+uniform vec2 uv_speed = vec2(0,-1);
+
+uniform bool affine_texture_mapping = true;
+uniform bool emissive = false;
+uniform bool moving_uv = false;
+uniform bool double_sided = false;
+
+uniform bool stippled_transparent = false;
+
+varying vec4 vertex_coordinates;
+
+void vertex() {
+	UV = UV * uv_scale + uv_offset + ((moving_uv)?uv_speed*TIME:vec2(0.0));
+	
+	float vertex_distance = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)));
+	
+	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	NORMAL = abs(vec4(NORMAL, 1.) * MODELVIEW_MATRIX).xyz;
+	
+	float vPos_w = (PROJECTION_MATRIX * vec4(VERTEX, 1.0)).w;
+	VERTEX.xy = vPos_w * round(vertex_resolution * VERTEX.xy / vPos_w) / vertex_resolution;
+	vertex_coordinates = vec4(UV * VERTEX.z, VERTEX.z, 0.0);
+	
+	if (vertex_distance > cull_distance)
+		VERTEX = vec3(.0);
+}
+
+void fragment() {
+	if (stippled_transparent && (mod(SCREEN_UV.x*VIEWPORT_SIZE.x+floor(mod(SCREEN_UV.y*VIEWPORT_SIZE.y, 2.0)), 2.0)<1.0)){
+		discard;
+	}
+	
+	vec4 tex;
+	if (affine_texture_mapping){
+		tex = texture(albedoTex, vertex_coordinates.xy / vertex_coordinates.z);
+	} else {
+		tex = texture(albedoTex, UV);
+	}
+	
+	ALPHA_SCISSOR = 0.5;
+	
+	if (!double_sided && !FRONT_FACING){
+		ALPHA = 0.0;
+	} else {
+		ALPHA = tex.a * tint_color.a * COLOR.a;
+	}
+
+	if (emissive){
+		EMISSION = tex.rgb * tint_color.rgb * COLOR.rgb;
+		ALBEDO = vec3(0.0);
+	} else {
+		ALBEDO = tex.rgb * tint_color.rgb * COLOR.rgb;
+	}
+	SPECULAR = specular_intensity;
+	ROUGHNESS = 1.0;
+	
+}
+"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+shader_param/tint_color = Color( 1, 0, 0, 1 )
+shader_param/specular_intensity = 0.0
+shader_param/vertex_resolution = 50.0
+shader_param/cull_distance = 200.0
+shader_param/uv_scale = Vector2( 1, 1 )
+shader_param/uv_offset = Vector2( 0, 0 )
+shader_param/uv_speed = Vector2( 0, -1 )
+shader_param/affine_texture_mapping = true
+shader_param/emissive = false
+shader_param/moving_uv = false
+shader_param/double_sided = false
+shader_param/stippled_transparent = false
+
+[sub_resource type="ConcavePolygonShape" id=5]
+data = PoolVector3Array( -10, 22.5, 37.5, -10, 12.5, 37.5, -10, 22.5, 22.5, -10, 22.5, 22.5, -10, 12.5, 37.5, -10, 12.5, 22.5, -10, 22.5, 22.5, -10, 12.5, 22.5, 10, 22.5, 22.5, 10, 22.5, 22.5, -10, 12.5, 22.5, 10, 12.5, 22.5, 10, 22.5, 22.5, 10, 12.5, 22.5, 10, 22.5, 37.5, 10, 22.5, 37.5, 10, 12.5, 22.5, 10, 12.5, 37.5, 10, 22.5, 37.5, 10, 12.5, 37.5, -10, 22.5, 37.5, -10, 22.5, 37.5, 10, 12.5, 37.5, -10, 12.5, 37.5, 10, 12.5, 22.5, -10, 12.5, 22.5, 10, 12.5, 37.5, 10, 12.5, 37.5, -10, 12.5, 22.5, -10, 12.5, 37.5, -10, 22.5, 22.5, 10, 22.5, 22.5, -10, 22.5, 37.5, -10, 22.5, 37.5, 10, 22.5, 22.5, 10, 22.5, 37.5, -14.1421, 12.5, 36.373, 0, 12.5, -1.0235, 0, 12.5, 47.5662, 0, 12.5, 47.5662, 0, 12.5, -1.0235, 14.1421, 12.5, 36.373, 0, 10, 47.5662, 14.1421, 10, 36.373, 0, 0, 41.8003, 0, 0, 41.8003, 14.1421, 10, 36.373, 5.3033, 0, 36.6809, 0, 0, -31.0842, -14.1421, 10, -23.8808, -5.3033, 0, -12.8631, 14.1421, 12.5, 36.373, 0, 12.5, -1.0235, 14.1421, 12.5, -25.3183, 14.1421, 12.5, -25.3183, 0, 12.5, -1.0235, 0, 12.5, -49.6131, -14.1421, 10, -23.8808, -14.1421, 10, 36.373, -5.3033, 0, -12.8631, -5.3033, 0, -12.8631, -14.1421, 10, 36.373, -5.3033, 0, 36.6809, 0, 12.5, -1.0235, -14.1421, 12.5, 36.373, 0, 12.5, -49.6131, 0, 12.5, -49.6131, -14.1421, 12.5, 36.373, -14.1421, 12.5, -25.3183, 0, 0, 5.358, -5.3033, 0, 36.6809, 5.3033, 0, 36.6809, 5.3033, 0, 36.6809, -5.3033, 0, 36.6809, 0, 0, 41.8003, 0, 0, 5.358, 5.3033, 0, 36.6809, 0, 0, -31.0842, 0, 0, -31.0842, 5.3033, 0, 36.6809, 5.3033, 0, -12.8631, -5.3033, 0, 36.6809, 0, 0, 5.358, -5.3033, 0, -12.8631, -5.3033, 0, -12.8631, 0, 0, 5.358, 0, 0, -31.0842, 14.1421, 10, 36.373, 14.1421, 10, -23.8808, 5.3033, 0, 36.6809, 5.3033, 0, 36.6809, 14.1421, 10, -23.8808, 5.3033, 0, -12.8631, -14.1421, 10, 36.373, 0, 10, 47.5662, -5.3033, 0, 36.6809, -5.3033, 0, 36.6809, 0, 10, 47.5662, 0, 0, 41.8003, 14.1421, 10, -23.8808, 0, 10, -48.1756, 0, 0, -31.0842, 14.1421, 10, -23.8808, 0, 0, -31.0842, 5.3033, 0, -12.8631, -14.1421, 10, -23.8808, 0, 0, -31.0842, 0, 10, -48.1756, 0, 12.5, -49.6131, -14.1421, 12.5, -25.3183, 0, 15, -50.2189, 0, 15, -50.2189, -14.1421, 12.5, -25.3183, -12.7279, 15, -27.9241, 14.1421, 12.5, -25.3183, 0, 12.5, -49.6131, 12.7279, 15, -27.9241, 12.7279, 15, -27.9241, 0, 12.5, -49.6131, 0, 15, -50.2189, 14.1421, 12.5, 36.373, 14.1421, 10, 36.373, 0, 12.5, 47.5662, 0, 12.5, 47.5662, 14.1421, 10, 36.373, 0, 10, 47.5662, 0, 12.5, 47.5662, 0, 10, 47.5662, -14.1421, 12.5, 36.373, -14.1421, 12.5, 36.373, 0, 10, 47.5662, -14.1421, 10, 36.373, 14.1421, 10, 36.373, 14.1421, 12.5, 36.373, 14.1421, 10, -23.8808, 14.1421, 10, -23.8808, 14.1421, 12.5, 36.373, 14.1421, 12.5, -25.3183, 0, 12.5, -49.6131, 0, 10, -48.1756, 14.1421, 12.5, -25.3183, 14.1421, 12.5, -25.3183, 0, 10, -48.1756, 14.1421, 10, -23.8808, -14.1421, 12.5, -25.3183, -14.1421, 10, -23.8808, 0, 12.5, -49.6131, 0, 12.5, -49.6131, -14.1421, 10, -23.8808, 0, 10, -48.1756, -14.1421, 12.5, 36.373, -14.1421, 10, 36.373, -14.1421, 12.5, -25.3183, -14.1421, 12.5, -25.3183, -14.1421, 10, 36.373, -14.1421, 10, -23.8808 )
+
+[sub_resource type="PlaneMesh" id=6]
+
+[sub_resource type="SpatialMaterial" id=7]
+albedo_color = Color( 0, 0, 0, 1 )
+
+[sub_resource type="GDScript" id=8]
+script/source = "extends Area
+
+
+# Declare member variables here. Examples:
+# var a = 2
+# var b = \"text\"
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	connect(\"body_entered\",self,\"collided\")
+func collided(body):
+	if body.name==\"Player\":
+		get_tree().change_scene(\"res://apt.tscn\")
+		
+"
+
+[sub_resource type="BoxShape" id=9]
+extents = Vector3( 1, 0.278714, 1 )
+
+[sub_resource type="Environment" id=10]
+background_mode = 1
+background_color = Color( 0.172549, 0.65098, 0.584314, 1 )
+ambient_light_energy = 0.0
+
+[sub_resource type="PlaneMesh" id=11]
+
+[sub_resource type="SpatialMaterial" id=12]
+params_diffuse_mode = 1
+params_specular_mode = 4
+albedo_texture = ExtResource( 3 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.6
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 3 )
+uv1_scale = Vector3( 8.868, 17.442, 1 )
+
+[sub_resource type="GDScript" id=13]
+script/source = "extends StaticBody
+
+
+# Declare member variables here. Examples:
+# var a = 2
+# var b = \"text\"
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta):
+#	pass
+"
+
+[sub_resource type="ConcavePolygonShape" id=14]
+data = PoolVector3Array( 1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0, -1, 1, 0, -1 )
+
+[sub_resource type="GDScript" id=15]
+script/source = "extends Area
+
+
+func _ready():
+	connect(\"body_entered\",self,\"collided\")
+func collided(body):
+	if body.name==\"Player\":
+		get_tree().change_scene(\"res://bigland.tscn\")
+		
+"
+
+[sub_resource type="BoxShape" id=16]
+extents = Vector3( 32.9132, 0.627004, 162.872 )
+
+[node name="ship" type="Spatial"]
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+mesh = ExtResource( 2 )
+material/0 = SubResource( 2 )
+material/1 = SubResource( 4 )
+
+[node name="StaticBody" type="StaticBody" parent="MeshInstance"]
+
+[node name="CollisionShape" type="CollisionShape" parent="MeshInstance/StaticBody"]
+shape = SubResource( 5 )
+
+[node name="CSGMesh" type="CSGMesh" parent="MeshInstance"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 13.4966, 22.4999 )
+mesh = SubResource( 6 )
+material = SubResource( 7 )
+
+[node name="Area" type="Area" parent="MeshInstance/CSGMesh"]
+script = SubResource( 8 )
+
+[node name="CollisionShape" type="CollisionShape" parent="MeshInstance/CSGMesh/Area"]
+shape = SubResource( 9 )
+
+[node name="Player" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.7795, 0 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 10 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 0.361162, 0.821273, 0.44167, -0.0960506, -0.438357, 0.893654, 0.927543, -0.365177, -0.0794342, 0, 26.2137, 0 )
+light_energy = 0.62
+shadow_bias = 16.0
+shadow_contact = 13.07
+directional_shadow_mode = 0
+directional_shadow_split_1 = 0.0
+directional_shadow_split_2 = 0.0
+directional_shadow_split_3 = 0.0
+directional_shadow_normal_bias = 0.0
+directional_shadow_bias_split_scale = 0.34
+directional_shadow_depth_range = 1
+directional_shadow_max_distance = 8192.0
+
+[node name="MeshInstance6" type="MeshInstance" parent="."]
+transform = Transform( 681.358, 0, 0, 0, 1, 0, 0, 0, 1374.72, 8.54854, 2.68025, 2.3768 )
+mesh = SubResource( 11 )
+material/0 = SubResource( 12 )
+
+[node name="StaticBody" type="StaticBody" parent="MeshInstance6"]
+script = SubResource( 13 )
+
+[node name="CollisionShape" type="CollisionShape" parent="MeshInstance6/StaticBody"]
+shape = SubResource( 14 )
+
+[node name="Area" type="Area" parent="MeshInstance6"]
+script = SubResource( 15 )
+
+[node name="CollisionShape" type="CollisionShape" parent="MeshInstance6/Area"]
+transform = Transform( 0.00146766, 0, 0, 0, 1, 0, 0, 0, 0.000727421, -0.0125463, -0.299384, -0.00172893 )
+shape = SubResource( 16 )
