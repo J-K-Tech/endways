@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/island.obj-a374c9b0c3ce8618af3faffe07ac15b5.mesh"
+
+[deps]
+
+files=[ "res://.import/island.obj-a374c9b0c3ce8618af3faffe07ac15b5.mesh" ]
+
+source_file="res://assets/3d/world/island.obj"
+dest_files=[ "res://.import/island.obj-a374c9b0c3ce8618af3faffe07ac15b5.mesh", "res://.import/island.obj-a374c9b0c3ce8618af3faffe07ac15b5.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

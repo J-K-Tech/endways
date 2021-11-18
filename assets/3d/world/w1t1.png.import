@@ -1,0 +1,36 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path.s3tc="res://.import/w1t1.png-38cdd2cee75bb4ba1bce9c800814b864.s3tc.stex"
+path.etc="res://.import/w1t1.png-38cdd2cee75bb4ba1bce9c800814b864.etc.stex"
+metadata={
+"imported_formats": [ "s3tc", "etc" ],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://assets/3d/world/w1t1.png"
+dest_files=[ "res://.import/w1t1.png-38cdd2cee75bb4ba1bce9c800814b864.s3tc.stex", "res://.import/w1t1.png-38cdd2cee75bb4ba1bce9c800814b864.etc.stex" ]
+
+[params]
+
+compress/mode=2
+compress/lossy_quality=1.0
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=2
+flags/repeat=0
+flags/filter=false
+flags/mipmaps=true
+flags/anisotropic=false
+flags/srgb=0
+process/fix_alpha_border=false
+process/premult_alpha=false
+process/HDR_as_SRGB=false
+process/invert_color=false
+stream=false
+size_limit=1024
+detect_3d=false
+svg/scale=1.0

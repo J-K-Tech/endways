@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/apt.obj-ab1bd5e9b6eb161660806f8a7fdd3386.mesh"
+
+[deps]
+
+files=[ "res://.import/apt.obj-ab1bd5e9b6eb161660806f8a7fdd3386.mesh" ]
+
+source_file="res://assets/3d/world/apt.obj"
+dest_files=[ "res://.import/apt.obj-ab1bd5e9b6eb161660806f8a7fdd3386.mesh", "res://.import/apt.obj-ab1bd5e9b6eb161660806f8a7fdd3386.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=false

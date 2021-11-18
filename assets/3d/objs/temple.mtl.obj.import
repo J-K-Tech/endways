@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/temple.mtl.obj-7b7aa480671c1f2eb64d252966d68685.mesh"
+
+[deps]
+
+files=[ "res://.import/temple.mtl.obj-7b7aa480671c1f2eb64d252966d68685.mesh" ]
+
+source_file="res://assets/3d/objs/temple.mtl.obj"
+dest_files=[ "res://.import/temple.mtl.obj-7b7aa480671c1f2eb64d252966d68685.mesh", "res://.import/temple.mtl.obj-7b7aa480671c1f2eb64d252966d68685.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
